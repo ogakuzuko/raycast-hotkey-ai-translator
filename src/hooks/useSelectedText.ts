@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { getSelectedText, showToast, Toast } from "@raycast/api";
 
 /**
@@ -44,23 +44,25 @@ export const useSelectedText = () => {
   // 状態に応じたコンテンツを定義
   const headerContent = "# 選択テキスト取得テスト\n\n";
 
-  // 状態に応じたコンテンツを取得
-  const getContent = () => {
+  // 状態に応じたコンテンツを取得（メモ化）
+  const content = useMemo(() => {
     if (isLoading) {
       return "選択テキストを取得中...";
     }
+
     if (error) {
       return `## エラー\n\n${error}`;
     }
+
     if (!selectedText) {
       return "選択されたテキストがありません。テキストを選択してから再試行してください。";
     }
 
     return `## 選択されたテキスト\n\n\`\`\`\n${selectedText}\n\`\`\``;
-  };
+  }, [isLoading, error, selectedText]);
 
   // マークダウンを生成
-  const markdown = headerContent + getContent();
+  const markdown = headerContent + content;
 
   return { markdown, isLoading };
 };
