@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { getSelectedText, showToast, Toast } from "@raycast/api";
 
 /**
+ * @deprecated テキスト取得用のCommandを別で作成したので、このフックは不要になりました。
+ *
  * 選択テキストを取得するカスタムフック
  * @returns マークダウンとローディング状態
  */
