@@ -23,9 +23,20 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for translation",
+      "type": "password",
+      "placeholder": "sk-...",
+      "required": true
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "openai": "^4.87.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
