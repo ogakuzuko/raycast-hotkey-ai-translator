@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "summarize-translate-by-llm",
-  "title": "Summarize / Translate by LLM",
-  "description": "LLMを用いて選択したテキストを要約/翻訳する。",
+  "name": "hotkey-ai-translator",
+  "title": "HotKey AI Translator",
+  "description": "A simple AI translation command that launches from Raycast's HotKey.",
   "icon": "extension-icon.png",
   "author": "ogakuzuko",
   "categories": [
@@ -11,27 +11,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "quick-summarize",
-      "title": "Quick Summarize",
-      "description": "",
+      "name": "get-selected-text",
+      "title": "AI Translate",
+      "description": "Translate the selected text using AI.",
       "mode": "no-view"
     },
     {
-      "name": "summarize-result-view-DO-NOT-USE-DIRECTLY",
-      "title": "【DO NOT USE DIRECTLY】Summarize Result View",
-      "description": "",
-      "mode": "view"
-    },
-    {
-      "name": "quick-translate",
-      "title": "Quick Translate",
-      "description": "",
-      "mode": "no-view"
-    },
-    {
-      "name": "translate-result-view-DO-NOT-USE-DIRECTLY",
+      "name": "ai-translate",
       "title": "【DO NOT USE DIRECTLY】Translate Result View",
-      "description": "",
+      "description": "Display the result of the AI translation. This command is intended to be called from the AI Translate command and should not be used directly.",
       "mode": "view"
     }
   ],

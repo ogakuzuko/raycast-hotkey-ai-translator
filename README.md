@@ -1,4 +1,4 @@
-# Summarize Translate by LLM
+# HotKey AI Translator
 
 Raycastアプリケーションで、選択したテキストをLLMを使用して要約・翻訳するツールです。
 
