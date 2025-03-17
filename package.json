@@ -11,17 +11,28 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "selected-text-get-command",
-      "title": "Get Selected Text（entry point。TODO: このコマンド名を`summarize`みたいなメインコマンド名にする）",
+      "name": "quick-summarize",
+      "title": "Quick Summarize",
       "description": "",
       "mode": "no-view"
     },
     {
-      "name": "summarize-text-command",
-      "title": "Summarize / Translate by LLM（TODO: ユーザーがこのコマンドを直接使うことはできないようにする）",
+      "name": "summarize-result-view-DO-NOT-USE-DIRECTLY",
+      "title": "【DO NOT USE DIRECTLY】Summarize Result View",
       "description": "",
-      "mode": "view",
-      "disabledByDefault": true
+      "mode": "view"
+    },
+    {
+      "name": "quick-translate",
+      "title": "Quick Translate",
+      "description": "",
+      "mode": "no-view"
+    },
+    {
+      "name": "translate-result-view-DO-NOT-USE-DIRECTLY",
+      "title": "【DO NOT USE DIRECTLY】Translate Result View",
+      "description": "",
+      "mode": "view"
     }
   ],
   "dependencies": {
