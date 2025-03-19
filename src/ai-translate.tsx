@@ -4,12 +4,13 @@ import OpenAI, { APIUserAbortError } from "openai";
 // import { usePromise } from "@raycast/utils"; // TODO: これ使いたい。
 
 export default function Command(props: LaunchProps) {
+  const inputText = props.launchContext?.inputText || "";
+
   const [translatedText, setTranslatedText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const inputText = props.launchContext?.inputText || "";
 
-  // 予期せぬアンマウントに起因するストリーミング処理の適切なクリーンアップ(中断)を実現するためのAbortController
+  // ストリーミング処理の適切なクリーンアップ(中断)を実現するためのAbortController（chat.completions.create()の返り値にもあるが、上手く動かなかったので自前実装した）
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -45,17 +46,14 @@ export default function Command(props: LaunchProps) {
           },
         );
 
-        let translatedText = "";
         for await (const chunk of stream) {
-          // 予期せず中断された場合はストリーミング処理を中断
+          // 予期せず中断された場合はループ処理を中断
           if (abortController.signal.aborted) {
             break;
           }
 
-          const content = chunk.choices[0].delta.content || "";
-          translatedText += content;
-
-          setTranslatedText(translatedText);
+          const deltaContent = chunk.choices[0].delta.content || ""; // deltaは変化量/差分を表す
+          setTranslatedText((prev) => prev + deltaContent);
         }
       } catch (error: unknown) {
         // AbortErrorは正常な中断なので無視（主に開発環境でのReactのStrictMode起因で発生する）
