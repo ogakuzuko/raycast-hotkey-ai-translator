@@ -1,6 +1,5 @@
 import { Detail, LaunchProps, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { translate } from "./services/openai";
 import OpenAI, { APIUserAbortError } from "openai";
 // import { usePromise } from "@raycast/utils"; // TODO: これ使いたい。
 
