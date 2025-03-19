@@ -1,64 +1,88 @@
-import { Detail, LaunchProps, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { translateToJapanese } from "./services/openai";
+import { Detail, LaunchProps, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { useState, useEffect, useRef } from "react";
+import { translate } from "./services/openai";
+import OpenAI from "openai";
+// import { usePromise } from "@raycast/utils"; // TODO: これ使いたい。
 
 export default function Command(props: LaunchProps) {
-  const [isLoading, setIsLoading] = useState(true);
   const [translatedText, setTranslatedText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
   const inputText = props.launchContext?.inputText || "";
 
+  // 予期せぬアンマウントに起因するストリーミング処理の適切なクリーンアップ(中断)を実現するためのAbortController
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
-    async function performTranslation() {
-      if (!inputText) {
-        setIsLoading(false);
-        return;
-      }
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
+    const translate = async () => {
       try {
-        const result = await translateToJapanese(inputText, (partialTranslation) => {
-          setTranslatedText(partialTranslation);
+        const preferences = getPreferenceValues();
+        const openaiClient = new OpenAI({
+          apiKey: preferences.openaiApiKey,
         });
 
-        if (result.error) {
-          setError(result.error);
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "翻訳エラー",
-            message: result.error,
-          });
+        setIsLoading(true);
+        const stream = await openaiClient.chat.completions.create(
+          {
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content: "あなたは翻訳者です。入力されたテキストを日本語に翻訳してください。翻訳以外の説明は不要です。",
+              },
+              {
+                role: "user",
+                content: inputText,
+              },
+            ],
+            stream: true,
+          },
+          {
+            // 中断シグナル
+            signal: abortController.signal,
+          },
+        );
+
+        let translatedText = "";
+        for await (const chunk of stream) {
+          // 予期せず中断された場合はストリーミング処理を中断
+          if (abortController.signal.aborted) {
+            break;
+          }
+
+          const content = chunk.choices[0].delta.content || "";
+          translatedText += content;
+
+          setTranslatedText(translatedText);
         }
-      } catch (e) {
-        const errorMessage = e instanceof Error ? e.message : "不明なエラーが発生しました";
-        setError(errorMessage);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "翻訳エラー",
-          message: errorMessage,
-        });
+      } catch (error) {
+        // AbortErrorは正常な中断なので無視
+        if (!(error instanceof Error) || error.name !== "AbortError") {
+          console.error("翻訳エラー:", error);
+          setError(error instanceof Error ? error.message : "不明なエラーが発生しました");
+        }
       } finally {
         setIsLoading(false);
       }
-    }
+    };
 
-    performTranslation();
+    translate();
+
+    return () => {
+      // コンポーネントのアンマウント時にストリーミング処理を中断する
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
   }, [inputText]);
-
-  const markdown = `
-## 元のテキスト
-
-\`\`\`
-${inputText}
-\`\`\`
-
-## 日本語訳
-
-${error ? `**エラー**: ${error}` : translatedText || "翻訳中..."}
-`;
 
   return (
     <Detail
-      markdown={markdown}
+      markdown={translatedText}
       isLoading={isLoading}
       actions={
         <ActionPanel>
