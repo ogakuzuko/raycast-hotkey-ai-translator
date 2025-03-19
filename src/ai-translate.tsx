@@ -1,7 +1,7 @@
 import { Detail, LaunchProps, ActionPanel, Action, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { translate } from "./services/openai";
-import OpenAI from "openai";
+import OpenAI, { APIUserAbortError } from "openai";
 // import { usePromise } from "@raycast/utils"; // TODO: これ使いたい。
 
 export default function Command(props: LaunchProps) {
@@ -58,11 +58,19 @@ export default function Command(props: LaunchProps) {
 
           setTranslatedText(translatedText);
         }
-      } catch (error) {
-        // AbortErrorは正常な中断なので無視
-        if (!(error instanceof Error) || error.name !== "AbortError") {
+      } catch (error: unknown) {
+        // AbortErrorは正常な中断なので無視（主に開発環境でのReactのStrictMode起因で発生する）
+        if (error instanceof APIUserAbortError) {
+          console.log("[INFO] ストリーミング処理が正常に中断されました");
+          return;
+        }
+
+        if (error instanceof Error) {
           console.error("翻訳エラー:", error);
-          setError(error instanceof Error ? error.message : "不明なエラーが発生しました");
+          setError(error.message);
+        } else {
+          console.error("翻訳エラー:", error);
+          setError("不明なエラーが発生しました");
         }
       } finally {
         setIsLoading(false);
