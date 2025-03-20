@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import OpenAI, { APIUserAbortError } from "openai";
+import { EmptyTextError } from "@/utils/errors";
 
 const getClient = () => {
   const preferences = getPreferenceValues<{ openaiApiKey: string }>();
@@ -28,7 +29,13 @@ export const useAI = (inputText: string) => {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const generate = useCallback(async () => {
+    console.log("[🐛DEBUG] useAI.ts__inputText: ", inputText);
+
     try {
+      if (!inputText) {
+        throw new EmptyTextError();
+      }
+
       const abortController = new AbortController();
       abortControllerRef.current = abortController;
 
@@ -70,12 +77,12 @@ export const useAI = (inputText: string) => {
     } catch (error: unknown) {
       // AbortErrorは正常な中断なので無視（主に開発環境でのReactのStrictMode起因で発生する）
       if (error instanceof APIUserAbortError) {
-        console.log("[INFO] ストリーミング処理が正常に中断されました");
+        console.log("[📝INFO] useAI.ts__error: ストリーミング処理が正常に中断されました");
         return;
       }
 
       if (error instanceof Error) {
-        console.error("翻訳エラー:", error);
+        console.error("[🚨ERROR] useAI.ts__error: ", error);
         setError(error);
       }
 
@@ -95,9 +102,15 @@ export const useAI = (inputText: string) => {
     };
   }, [generate]);
 
+  const retry = useCallback(() => {
+    setGeneratedText("");
+    generate();
+  }, [generate]);
+
   return {
     data: generatedText,
     isLoading,
     error,
+    retry,
   };
 };

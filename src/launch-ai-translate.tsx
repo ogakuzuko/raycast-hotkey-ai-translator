@@ -1,6 +1,6 @@
 import { getSelectedText, launchCommand, LaunchType } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { NoTextSelectedError } from "@/utils/errors";
+import { EmptyTextError } from "@/utils/errors";
 
 /**
  * 選択中のテキストを取得してAI翻訳コマンドを起動するコマンド（ここがエントリポイント）
@@ -11,7 +11,7 @@ export default async function Command() {
     const selectedText = (await getSelectedText()).trim();
 
     if (!selectedText) {
-      throw new NoTextSelectedError();
+      throw new EmptyTextError();
     }
 
     await launchCommand({
@@ -22,7 +22,7 @@ export default async function Command() {
       },
     });
   } catch (error) {
-    if (error instanceof NoTextSelectedError) {
+    if (error instanceof EmptyTextError) {
       showFailureToast(error, {
         title: "No text selected. Please select a text to translate.",
       });
