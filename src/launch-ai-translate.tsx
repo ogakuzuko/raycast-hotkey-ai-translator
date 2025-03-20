@@ -2,6 +2,9 @@ import { getSelectedText, launchCommand, LaunchType } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { NoTextSelectedError } from "@/utils/errors";
 
+/**
+ * 選択中のテキストを取得してAI翻訳コマンドを起動するコマンド（ここがエントリポイント）
+ */
 export default async function Command() {
   try {
     // 前後空白は削除する

@@ -1,6 +1,10 @@
 import { useAI } from "@/utils/hooks/useAI";
-import { Detail, LaunchProps, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Detail, LaunchProps, ActionPanel, Action } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
+/**
+ * 入力テキストをAI翻訳して結果を表示するコマンド
+ */
 export default function Command(props: LaunchProps) {
   const inputText = props.launchContext?.inputText || "";
 
@@ -13,10 +17,9 @@ export default function Command(props: LaunchProps) {
   });
 
   if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "翻訳エラー",
-      message: error.message,
+    // TODO: 翻訳中のエラー発生は、トーストで出すより画面に表示してあげるほうが親切な気がするので、後で修正する。
+    showFailureToast(error, {
+      title: "An error occurred during translation. Please try again.",
     });
   }
 
@@ -27,7 +30,7 @@ export default function Command(props: LaunchProps) {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard
-            title="翻訳結果をコピー"
+            title="Copy Translation Result"
             content={translatedText}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
