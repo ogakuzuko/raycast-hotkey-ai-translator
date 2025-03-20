@@ -1,6 +1,6 @@
-export class NoTextSelectedError extends Error {
-  constructor(message = "No text selected.") {
+export class EmptyTextError extends Error {
+  constructor(message = "Text input is empty.") {
     super(message);
-    this.name = "NoTextSelectedError";
+    this.name = "EmptyTextError";
   }
 }

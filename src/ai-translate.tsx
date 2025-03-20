@@ -1,6 +1,5 @@
 import { useAI } from "@/utils/hooks/useAI";
-import { Detail, LaunchProps, ActionPanel, Action } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Detail, LaunchProps, ActionPanel, Action, Icon } from "@raycast/api";
 
 /**
  * 入力テキストをAI翻訳して結果を表示するコマンド
@@ -8,25 +7,32 @@ import { showFailureToast } from "@raycast/utils";
 export default function Command(props: LaunchProps) {
   const inputText = props.launchContext?.inputText || "";
 
-  const { data: translatedText, isLoading, error } = useAI(inputText);
-
-  if (error) {
-    // TODO: 翻訳中のエラー発生は、トーストで出すより画面に表示してあげるほうが親切な気がするので、後で修正する。
-    showFailureToast(error, {
-      title: "An error occurred during translation. Please try again.",
-    });
-  }
+  const { data: translatedText, isLoading, error, retry } = useAI(inputText);
 
   return (
     <Detail
-      markdown={translatedText}
+      markdown={error ? "🚨 An error occurred during translation. Please try again." : translatedText}
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Translation Result"
-            content={translatedText}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          {error ? (
+            <Action
+              title="Retry"
+              icon={Icon.RotateClockwise}
+              onAction={retry}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+            />
+          ) : (
+            <Action.CopyToClipboard
+              title="Copy Results"
+              content={translatedText}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+          )}
+          <Action.OpenInBrowser
+            title="Open Usage Dashboard"
+            url="https://platform.openai.com/settings/organization/usage"
+            icon={Icon.BarChart}
           />
         </ActionPanel>
       }
