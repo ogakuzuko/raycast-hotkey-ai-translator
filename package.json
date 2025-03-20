@@ -11,15 +11,15 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "get-selected-text",
+      "name": "launch-ai-translate",
       "title": "AI Translate",
-      "description": "Translate the selected text using AI.",
+      "description": "Translate the selected text using AI. Please set a hotkey for this command.",
       "mode": "no-view"
     },
     {
       "name": "ai-translate",
-      "title": "【DO NOT USE DIRECTLY】Translate Result View",
-      "description": "Display the result of the AI translation. This command is intended to be called from the AI Translate command and should not be used directly.",
+      "title": "AI Translation Result (Called by AI Translate)",
+      "description": "Display the AI translation result. This command is called automatically by AI Translate and should not be used directly.",
       "mode": "view"
     }
   ],
