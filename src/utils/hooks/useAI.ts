@@ -102,10 +102,15 @@ export const useAI = (inputText: string) => {
     };
   }, [generate]);
 
+  const retry = useCallback(() => {
+    setGeneratedText("");
+    generate();
+  }, [generate]);
+
   return {
     data: generatedText,
     isLoading,
     error,
-    retry: generate,
+    retry,
   };
 };
