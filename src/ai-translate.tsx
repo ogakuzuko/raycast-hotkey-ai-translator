@@ -10,12 +10,6 @@ export default function Command(props: LaunchProps) {
 
   const { data: translatedText, isLoading, error } = useAI(inputText);
 
-  console.log("[DEBUG] useAI", {
-    translatedText,
-    isLoading,
-    error,
-  });
-
   if (error) {
     // TODO: 翻訳中のエラー発生は、トーストで出すより画面に表示してあげるほうが親切な気がするので、後で修正する。
     showFailureToast(error, {
