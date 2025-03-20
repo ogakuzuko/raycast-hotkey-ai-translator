@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import OpenAI, { APIUserAbortError } from "openai";
 import { EmptyTextError } from "@/utils/errors";
@@ -22,7 +22,7 @@ const getClient = () => {
  */
 export const useAI = (inputText: string) => {
   const [generatedText, setGeneratedText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | undefined>();
 
   // ストリーミング処理の適切なクリーンアップ(中断)を実現するためのAbortController（chat.completions.create()の返り値にもあるが、上手く動かなかったので自前実装した）
@@ -31,17 +31,29 @@ export const useAI = (inputText: string) => {
   const generate = useCallback(async () => {
     console.log("[🐛DEBUG] useAI.ts__inputText: ", inputText);
 
+    setIsLoading(true);
+    setGeneratedText("");
+
+    // 中断処理用のAbortControllerを作成してrefにセット
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
+
+    /**
+     * NOTE: 厳密な調査はできていないが、このトースト表示処理を上のAbortControllerのセット処理よりも前に実行すると、RefオブジェクトにAbortControllerがセットされる前にReactのStrictModeに起因するアンマウントが発火してしまうためか、初回マウント時のLLMストリーミング処理がクリーンアップされずに残ってしまい、2回目マウント時のLLMストリーミング処理と並行して動いてしまうために、翻訳結果がおかしくなるという現象を確認した。上記挙動を再現したい場合は、この`showToast`処理を`abortControllerRef.current = abortController;`よりも前に実行することで再現可能。
+     *
+     * MEMO: 「showToast実行 → AbortControllerのrefセット → LLMストリーミング処理実行 → useEffectアンマウント時のクリーンアップ処理」の順に処理が進んでいるとき、初回マウント時のLLMストリーミング処理が実行されている（この時点ではrefのセット処理も動いているはず）にも関わらず、useEffectアンマウント時のクリーンアップ処理では`abort()`が実行できていないという事実から、refにセットするタイミングとアンマウントが実行されるタイミングの処理順が関係していたりするのかもしれない（より詳細に調査したい場合はたくさんデバッグログを仕込んでみると発見があるかも）。
+     */
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Translating...",
+    });
+
     try {
       if (!inputText) {
         throw new EmptyTextError();
       }
 
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-
       const client = getClient();
-
-      setIsLoading(true);
       const stream = await client.chat.completions.create(
         {
           model: "gpt-4o-mini",
@@ -74,6 +86,8 @@ export const useAI = (inputText: string) => {
       }
 
       setIsLoading(false);
+      toast.style = Toast.Style.Success;
+      toast.title = "Translation successful";
     } catch (error: unknown) {
       // AbortErrorは正常な中断なので無視（主に開発環境でのReactのStrictMode起因で発生する）
       if (error instanceof APIUserAbortError) {
@@ -87,6 +101,8 @@ export const useAI = (inputText: string) => {
       }
 
       setIsLoading(false);
+      toast.style = Toast.Style.Failure;
+      toast.title = "Translation failed";
     }
   }, [inputText]);
 
@@ -103,7 +119,6 @@ export const useAI = (inputText: string) => {
   }, [generate]);
 
   const retry = useCallback(() => {
-    setGeneratedText("");
     generate();
   }, [generate]);
 

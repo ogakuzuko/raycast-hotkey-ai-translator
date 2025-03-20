@@ -14,27 +14,29 @@ export default function Command(props: LaunchProps) {
       markdown={error ? "🚨 An error occurred during translation. Please try again." : translatedText}
       isLoading={isLoading}
       actions={
-        <ActionPanel>
-          {error ? (
-            <Action
-              title="Retry"
-              icon={Icon.RotateClockwise}
-              onAction={retry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+        isLoading ? null : (
+          <ActionPanel>
+            {error ? (
+              <Action
+                title="Retry"
+                icon={Icon.RotateClockwise}
+                onAction={retry}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
+            ) : (
+              <Action.CopyToClipboard
+                title="Copy Results"
+                content={translatedText}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+              />
+            )}
+            <Action.OpenInBrowser
+              title="Open Usage Dashboard"
+              url="https://platform.openai.com/settings/organization/usage"
+              icon={Icon.BarChart}
             />
-          ) : (
-            <Action.CopyToClipboard
-              title="Copy Results"
-              content={translatedText}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-          )}
-          <Action.OpenInBrowser
-            title="Open Usage Dashboard"
-            url="https://platform.openai.com/settings/organization/usage"
-            icon={Icon.BarChart}
-          />
-        </ActionPanel>
+          </ActionPanel>
+        )
       }
     />
   );
