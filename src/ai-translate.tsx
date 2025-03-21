@@ -1,5 +1,5 @@
 import { useAI } from "@/utils/hooks/useAI";
-import { Detail, LaunchProps, ActionPanel, Action, Icon } from "@raycast/api";
+import { Detail, LaunchProps, ActionPanel, Action, Icon, openExtensionPreferences } from "@raycast/api";
 
 /**
  * 入力テキストをAI翻訳して結果を表示するコマンド
@@ -11,7 +11,11 @@ export default function Command(props: LaunchProps) {
 
   return (
     <Detail
-      markdown={error ? "🚨 An error occurred during translation. Please try again." : translatedText}
+      markdown={
+        error
+          ? `🚨 An error occurred during translation. Please try again.\n\n\`\`\`\n${error}\n\`\`\``
+          : translatedText
+      }
       isLoading={isLoading}
       actions={
         isLoading ? null : (
@@ -32,8 +36,15 @@ export default function Command(props: LaunchProps) {
             )}
             <Action.OpenInBrowser
               title="Open Usage Dashboard"
-              url="https://platform.openai.com/settings/organization/usage"
               icon={Icon.BarChart}
+              url="https://platform.openai.com/settings/organization/usage"
+              shortcut={{ modifiers: ["cmd"], key: "u" }}
+            />
+            <Action
+              title="Open Extension Preferences"
+              icon={Icon.Gear}
+              onAction={openExtensionPreferences}
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
             />
           </ActionPanel>
         )

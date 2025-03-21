@@ -3,11 +3,25 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import OpenAI, { APIUserAbortError } from "openai";
 import { EmptyTextError } from "@/utils/errors";
 
+/**
+ * Raycastの設定値を取得する関数（Preferences型はグローバルな型として `package.json` の `preferences` と同期している）
+ *
+ * @see https://developers.raycast.com/api-reference/preferences#types
+ */
+const getPreferences = (): Preferences => {
+  return getPreferenceValues<Preferences>();
+};
+
+// OpenAIクライアントを取得する関数（TODO: こういう系はファイルとしてどこに置くのがベスプラなのだろうか）
 const getClient = () => {
-  const preferences = getPreferenceValues<{ openaiApiKey: string }>();
   return new OpenAI({
-    apiKey: preferences.openaiApiKey,
+    apiKey: getPreferences().openaiApiKey,
   });
+};
+
+// targetLanguageをサニタイズする関数（軽めのプロンプトインジェクション対策として20文字制限を設ける）
+const sanitizeTargetLanguage = (language: string): string => {
+  return language.trim().slice(0, 20);
 };
 
 /**
@@ -53,19 +67,16 @@ export const useAI = (inputText: string) => {
         throw new EmptyTextError();
       }
 
+      const targetLanguage = sanitizeTargetLanguage(getPreferences().targetLanguage);
+      const systemPrompt = `Please translate the input text into ${targetLanguage}. Do not include any explanations — only provide the translation.`;
+
       const client = getClient();
       const stream = await client.chat.completions.create(
         {
           model: "gpt-4o-mini",
           messages: [
-            {
-              role: "system",
-              content: "あなたは翻訳者です。入力されたテキストを日本語に翻訳してください。翻訳以外の説明は不要です。",
-            },
-            {
-              role: "user",
-              content: inputText,
-            },
+            { role: "system", content: systemPrompt },
+            { role: "user", content: inputText },
           ],
           stream: true,
         },
@@ -89,7 +100,7 @@ export const useAI = (inputText: string) => {
       toast.style = Toast.Style.Success;
       toast.title = "Translation successful";
     } catch (error: unknown) {
-      // AbortErrorは正常な中断なので無視（主に開発環境でのReactのStrictMode起因で発生する）
+      // AbortErrorはクリーンアップ時の正常な中断なので無視（主に開発環境でのReactのStrictMode起因で発生する）
       if (error instanceof APIUserAbortError) {
         console.log("[📝INFO] useAI.ts__error: ストリーミング処理が正常に中断されました");
         return;
