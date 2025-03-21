@@ -31,6 +31,14 @@
       "type": "password",
       "placeholder": "sk-...",
       "required": true
+    },
+    {
+      "name": "targetLanguage",
+      "title": "Target Language",
+      "description": "Language to translate to (e.g. Japanese, English, French, Chinese, etc.)",
+      "type": "textfield",
+      "placeholder": "Japanese, English, French, Chinese, etc.",
+      "required": true
     }
   ],
   "dependencies": {
