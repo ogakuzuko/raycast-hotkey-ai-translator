@@ -3,7 +3,7 @@
   "name": "hotkey-ai-translator",
   "title": "HotKey AI Translator",
   "description": "A simple AI translation command that launches from Raycast's HotKey.",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon_command_black.png",
   "author": "ogakuzuko",
   "categories": [
     "Productivity"
