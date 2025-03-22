@@ -67,7 +67,7 @@ export const useAI = (inputText: string) => {
         throw new EmptyTextError();
       }
 
-      const targetLanguage = sanitizeTargetLanguage(getPreferences().targetLanguage);
+      const targetLanguage = sanitizeTargetLanguage(getPreferences().targetLanguage ?? "English");
       const systemPrompt = `Please translate the input text into ${targetLanguage}. Do not include any explanations — only provide the translation.`;
 
       const client = getClient();
