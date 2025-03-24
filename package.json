@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hotkey-ai-translator",
-  "title": "HotKey AI Translator",
-  "description": "A simple AI translation command that launches from Raycast's HotKey.",
+  "title": "Hotkey AI Translator",
+  "description": "A simple AI translation command that launches from Raycast's Hotkey.",
   "icon": "extension_icon_command_black.png",
   "author": "ogakuzuko",
   "categories": [
@@ -18,7 +18,7 @@
     },
     {
       "name": "ai-translate",
-      "title": "AI Translation Result (Called by AI Translate)",
+      "title": "AI Translation Result (called by AI Translate)",
       "description": "Display the AI translation result. This command is called automatically by AI Translate and should not be used directly.",
       "mode": "view"
     }
